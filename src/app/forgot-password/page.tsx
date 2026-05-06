@@ -7,12 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sparkles, Mail, ArrowLeft, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAppStore } from "@/stores/appStore";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
+  const resetPassword = useAppStore((state) => state.resetPassword);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,15 +30,23 @@ export default function ForgotPasswordPage() {
 
     setIsLoading(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const success = await resetPassword(email.trim());
 
     setIsLoading(false);
-    setIsSubmitted(true);
 
-    toast({
-      title: "Reset link sent!",
-      description: "Check your email for password reset instructions.",
-    });
+    if (success) {
+      setIsSubmitted(true);
+      toast({
+        title: "Reset link sent!",
+        description: "Check your email for password reset instructions.",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to send reset link. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

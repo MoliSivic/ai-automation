@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, use } from "react";
+import { useState, useMemo, use, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +21,16 @@ interface StudyModePageProps {
 
 export default function StudyModePage({ params }: StudyModePageProps) {
   const { deckId } = use(params);
-  const { decks, cards, settings, createStudySession } = useAppStore();
+  const { decks, cards, settings, createStudySession, fetchCards } =
+    useAppStore();
+
+  const [cardsLoaded, setCardsLoaded] = useState(false);
+
+  useEffect(() => {
+    if (deckId) {
+      fetchCards(deckId).then(() => setCardsLoaded(true));
+    }
+  }, [deckId, fetchCards]);
 
   const deck = decks.find((d) => d.id === deckId);
   const deckCards = deckId ? cards[deckId] || [] : [];
@@ -31,7 +40,8 @@ export default function StudyModePage({ params }: StudyModePageProps) {
       return [...deckCards].sort(() => Math.random() - 0.5);
     }
     return deckCards;
-  }, [deckCards, settings.shuffle_enabled]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cardsLoaded, settings.shuffle_enabled]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -39,12 +49,30 @@ export default function StudyModePage({ params }: StudyModePageProps) {
   const [unknownCards, setUnknownCards] = useState<Set<string>>(new Set());
   const [isComplete, setIsComplete] = useState(false);
 
-  if (!deck || studyCards.length === 0) {
+  // Reset index if it goes out of bounds (e.g. cards reloaded)
+  useEffect(() => {
+    if (studyCards.length > 0 && currentIndex >= studyCards.length) {
+      setCurrentIndex(0);
+    }
+  }, [studyCards.length, currentIndex]);
+
+  if (!cardsLoaded || !deck) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">Loading cards...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (studyCards.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4">
         <div className="text-center">
           <h2 className="text-lg sm:text-xl font-semibold mb-2">
-            {!deck ? "Deck not found" : "No cards to study"}
+            No cards to study
           </h2>
           <Link href="/dashboard">
             <Button>Back to Dashboard</Button>
@@ -54,7 +82,7 @@ export default function StudyModePage({ params }: StudyModePageProps) {
     );
   }
 
-  const currentCard = studyCards[currentIndex];
+  const currentCard = studyCards[currentIndex] ?? studyCards[0];
   const totalCards = studyCards.length;
   const answeredCards = knownCards.size + unknownCards.size;
   const progress = (answeredCards / totalCards) * 100;
@@ -74,8 +102,9 @@ export default function StudyModePage({ params }: StudyModePageProps) {
     if (currentIndex < totalCards - 1) {
       setTimeout(() => setCurrentIndex((prev) => prev + 1), 200);
     } else {
-      createStudySession(deck.id, knownCards.size + 1, totalCards);
-      setIsComplete(true);
+      createStudySession(deck.id, knownCards.size + 1, totalCards).then(() => {
+        setIsComplete(true);
+      });
     }
   };
 
@@ -162,7 +191,7 @@ export default function StudyModePage({ params }: StudyModePageProps) {
       <header className="flex-shrink-0 border-b border-border bg-background/80 backdrop-blur-md z-10">
         <div className="container mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
           <Link
-            href={`/decks/${deckId}`}
+            href="/dashboard"
             className="flex items-center gap-1.5 sm:gap-2 text-muted-foreground hover:text-foreground text-sm sm:text-base"
           >
             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />

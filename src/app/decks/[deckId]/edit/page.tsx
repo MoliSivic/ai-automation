@@ -35,7 +35,7 @@ export default function EditDeckPage({ params }: EditDeckPageProps) {
     }
   }, [deck, deckId, router]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title.trim()) {
@@ -51,7 +51,7 @@ export default function EditDeckPage({ params }: EditDeckPageProps) {
 
     setIsLoading(true);
     try {
-      updateDeck(deckId, title.trim(), description.trim());
+      await updateDeck(deckId, title.trim(), description.trim());
       toast({
         title: "Deck updated!",
         description: "Your changes have been saved.",

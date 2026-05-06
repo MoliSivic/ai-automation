@@ -26,6 +26,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { DarkModeToggle } from "@/components/dark-mode-toggle";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,14 +60,14 @@ export default function DashboardPage() {
     );
   }, [decks, searchQuery]);
 
-  const handleLogout = () => {
-    logout();
-    router.push("/");
+  const handleLogout = async () => {
+    await logout();
+    window.location.href = "/";
   };
 
-  const handleDeleteDeck = () => {
+  const handleDeleteDeck = async () => {
     if (deckToDelete) {
-      deleteDeck(deckToDelete);
+      await deleteDeck(deckToDelete);
       setDeckToDelete(null);
     }
   };
@@ -85,6 +86,7 @@ export default function DashboardPage() {
           </Link>
 
           <div className="hidden sm:flex items-center gap-2 sm:gap-3">
+            <DarkModeToggle />
             <Link href="/settings">
               <Button variant="ghost" size="icon">
                 <Settings className="w-5 h-5" />
@@ -144,6 +146,7 @@ export default function DashboardPage() {
                     Settings
                   </Button>
                 </Link>
+                <DarkModeToggle className="w-full justify-start gap-3 px-4 h-10 rounded-md font-normal" />
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 text-destructive hover:text-destructive"

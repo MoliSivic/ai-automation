@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -24,10 +23,13 @@ import {
   Wand2,
   LogOut,
   Save,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { useAppStore } from "@/stores/appStore";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeName } from "@/lib/mockData";
+import { useDarkMode } from "@/hooks/use-dark-mode";
 
 const themes: { value: ThemeName; label: string; colors: string[] }[] = [
   {
@@ -66,20 +68,15 @@ export default function SettingsPage() {
   const [shuffleEnabled, setShuffleEnabled] = useState(
     settings.shuffle_enabled,
   );
-  const [dailyGoal, setDailyGoal] = useState([settings.daily_goal]);
   const [selectedTheme, setSelectedTheme] = useState<ThemeName>(settings.theme);
   const [aiModel, setAiModel] = useState(settings.ai_model);
-  const [cardsPerSession, setCardsPerSession] = useState([
-    settings.cards_per_session,
-  ]);
+  const { isDark, setDark } = useDarkMode();
 
-  const handleSave = () => {
-    updateSettings({
+  const handleSave = async () => {
+    await updateSettings({
       shuffle_enabled: shuffleEnabled,
-      daily_goal: dailyGoal[0],
       theme: selectedTheme,
       ai_model: aiModel,
-      cards_per_session: cardsPerSession[0],
     });
 
     document.documentElement.setAttribute("data-theme", selectedTheme);
@@ -90,9 +87,9 @@ export default function SettingsPage() {
     });
   };
 
-  const handleLogout = () => {
-    logout();
-    router.push("/");
+  const handleLogout = async () => {
+    await logout();
+    window.location.href = "/";
   };
 
   return (
@@ -107,6 +104,17 @@ export default function SettingsPage() {
               FlashGenius
             </span>
           </Link>
+          <button
+            onClick={() => setDark(!isDark)}
+            className="p-2 rounded-md hover:bg-muted transition-colors"
+            aria-label="Toggle dark mode"
+          >
+            {isDark ? (
+              <Sun className="w-5 h-5" />
+            ) : (
+              <Moon className="w-5 h-5" />
+            )}
+          </button>
         </div>
       </nav>
 
@@ -173,30 +181,42 @@ export default function SettingsPage() {
               </h2>
             </div>
 
-            <div className="space-y-3">
-              <Label className="text-sm">Color Theme</Label>
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3">
-                {themes.map((theme) => (
-                  <button
-                    key={theme.value}
-                    onClick={() => setSelectedTheme(theme.value)}
-                    className={`relative flex flex-col items-center p-2 sm:p-3 rounded-lg border-2 transition-all ${
-                      selectedTheme === theme.value
-                        ? "border-primary bg-primary/5"
-                        : "border-transparent bg-muted hover:bg-muted/80"
-                    }`}
-                  >
-                    <div
-                      className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mb-1 sm:mb-2"
-                      style={{
-                        background: `linear-gradient(135deg, ${theme.colors[0]}, ${theme.colors[1]})`,
-                      }}
-                    />
-                    <span className="text-[10px] sm:text-xs font-medium">
-                      {theme.label}
-                    </span>
-                  </button>
-                ))}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm">Dark Mode</Label>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    Switch between light and dark appearance
+                  </p>
+                </div>
+                <Switch checked={isDark} onCheckedChange={setDark} />
+              </div>
+
+              <div className="space-y-3">
+                <Label className="text-sm">Color Theme</Label>
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3">
+                  {themes.map((theme) => (
+                    <button
+                      key={theme.value}
+                      onClick={() => setSelectedTheme(theme.value)}
+                      className={`relative flex flex-col items-center p-2 sm:p-3 rounded-lg border-2 transition-all ${
+                        selectedTheme === theme.value
+                          ? "border-primary bg-primary/5"
+                          : "border-transparent bg-muted hover:bg-muted/80"
+                      }`}
+                    >
+                      <div
+                        className="w-6 h-6 sm:w-8 sm:h-8 rounded-full mb-1 sm:mb-2"
+                        style={{
+                          background: `linear-gradient(135deg, ${theme.colors[0]}, ${theme.colors[1]})`,
+                        }}
+                      />
+                      <span className="text-[10px] sm:text-xs font-medium">
+                        {theme.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -224,41 +244,6 @@ export default function SettingsPage() {
                   onCheckedChange={setShuffleEnabled}
                 />
               </div>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm">Daily Goal</Label>
-                  <span className="text-sm font-medium">
-                    {dailyGoal[0]} cards
-                  </span>
-                </div>
-                <Slider
-                  value={dailyGoal}
-                  onValueChange={setDailyGoal}
-                  min={5}
-                  max={100}
-                  step={5}
-                />
-                <p className="text-[10px] sm:text-xs text-muted-foreground">
-                  Set your daily study target
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm">Cards Per Session</Label>
-                  <span className="text-sm font-medium">
-                    {cardsPerSession[0]} cards
-                  </span>
-                </div>
-                <Slider
-                  value={cardsPerSession}
-                  onValueChange={setCardsPerSession}
-                  min={5}
-                  max={50}
-                  step={5}
-                />
-              </div>
             </div>
           </div>
 
@@ -279,11 +264,12 @@ export default function SettingsPage() {
                   <SelectValue placeholder="Select a model" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="gpt-4">GPT-4 (Best quality)</SelectItem>
-                  <SelectItem value="gpt-3.5-turbo">
-                    GPT-3.5 Turbo (Faster)
+                  <SelectItem value="gemini-2.5-flash-lite">
+                    Gemini 2.5 Flash Lite (Free)
                   </SelectItem>
-                  <SelectItem value="claude">Claude (Alternative)</SelectItem>
+                  <SelectItem value="gemma-3-4b-it">
+                    Gemma 3 4B (Free, lightweight)
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-[10px] sm:text-xs text-muted-foreground">

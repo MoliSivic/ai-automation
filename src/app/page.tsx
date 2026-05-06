@@ -14,6 +14,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import { DarkModeToggle } from "@/components/dark-mode-toggle";
 import { useAppStore } from "@/stores/appStore";
 
 const features = [
@@ -86,6 +87,7 @@ export default function LandingPage() {
           </Link>
 
           <div className="hidden sm:flex items-center gap-3">
+            <DarkModeToggle />
             <Link href="/login">
               <Button variant="ghost" className="font-medium">
                 Log in
@@ -307,7 +309,7 @@ export default function LandingPage() {
               </span>
             </div>
             <p className="text-muted-foreground text-xs sm:text-sm">
-              © 2024 FlashGenius. Built for learners everywhere.
+              Built for learners everywhere.
             </p>
           </div>
         </div>

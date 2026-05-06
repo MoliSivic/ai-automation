@@ -2,6 +2,7 @@ export interface User {
   id: string;
   email: string;
   full_name: string;
+  name?: string;
   created_at: string;
 }
 
@@ -25,6 +26,8 @@ export interface Card {
   updated_at: string;
 }
 
+export type ThemeName = "ocean" | "sunset" | "forest" | "lavender" | "midnight";
+
 export interface Settings {
   id: string;
   user_id: string;
@@ -32,7 +35,9 @@ export interface Settings {
   daily_goal: number | null;
   default_ai_card_count: number;
   default_ai_style: string;
-  theme: string;
+  ai_model: string;
+  cards_per_session: number;
+  theme: ThemeName;
   updated_at: string;
 }
 
@@ -231,6 +236,8 @@ export const mockSettings: Settings = {
   daily_goal: 20,
   default_ai_card_count: 10,
   default_ai_style: "concise",
+  ai_model: "gemini-2.5-flash-lite",
+  cards_per_session: 10,
   theme: "ocean",
   updated_at: "2024-01-20T00:00:00Z",
 };

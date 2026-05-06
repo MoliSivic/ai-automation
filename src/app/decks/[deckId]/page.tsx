@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, use, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -50,8 +50,13 @@ interface DeckDetailPageProps {
 export default function DeckDetailPage({ params }: DeckDetailPageProps) {
   const { deckId } = use(params);
   const { toast } = useToast();
-  const { decks, cards, addCard, updateCard, deleteCard } = useAppStore();
+  const { decks, cards, addCard, updateCard, deleteCard, fetchCards } =
+    useAppStore();
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (deckId) fetchCards(deckId);
+  }, [deckId, fetchCards]);
 
   const deck = decks.find((d) => d.id === deckId);
   const deckCards = deckId ? cards[deckId] || [] : [];
@@ -77,7 +82,7 @@ export default function DeckDetailPage({ params }: DeckDetailPageProps) {
     );
   }
 
-  const handleAddCard = () => {
+  const handleAddCard = async () => {
     if (!frontText.trim() || !backText.trim()) {
       toast({
         title: "Both sides required",
@@ -87,7 +92,7 @@ export default function DeckDetailPage({ params }: DeckDetailPageProps) {
       return;
     }
 
-    addCard(deck.id, frontText.trim(), backText.trim());
+    await addCard(deck.id, frontText.trim(), backText.trim());
     setFrontText("");
     setBackText("");
     setIsAddingCard(false);
@@ -97,7 +102,7 @@ export default function DeckDetailPage({ params }: DeckDetailPageProps) {
     });
   };
 
-  const handleUpdateCard = () => {
+  const handleUpdateCard = async () => {
     if (!editingCard || !frontText.trim() || !backText.trim()) {
       toast({
         title: "Both sides required",
@@ -107,7 +112,7 @@ export default function DeckDetailPage({ params }: DeckDetailPageProps) {
       return;
     }
 
-    updateCard(editingCard, deck.id, frontText.trim(), backText.trim());
+    await updateCard(editingCard, deck.id, frontText.trim(), backText.trim());
     setFrontText("");
     setBackText("");
     setEditingCard(null);
@@ -117,9 +122,9 @@ export default function DeckDetailPage({ params }: DeckDetailPageProps) {
     });
   };
 
-  const handleDeleteCard = () => {
+  const handleDeleteCard = async () => {
     if (cardToDelete) {
-      deleteCard(cardToDelete, deck.id);
+      await deleteCard(cardToDelete, deck.id);
       setCardToDelete(null);
       toast({
         title: "Card deleted",
@@ -144,7 +149,7 @@ export default function DeckDetailPage({ params }: DeckDetailPageProps) {
     setEditingCard(null);
   };
 
-  const CardFormContent = () => (
+  const cardFormContent = (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="front" className="text-sm">
@@ -345,9 +350,7 @@ export default function DeckDetailPage({ params }: DeckDetailPageProps) {
                 {editingCard ? "Edit Flashcard" : "Add New Flashcard"}
               </DrawerTitle>
             </DrawerHeader>
-            <div className="px-4 pb-2">
-              <CardFormContent />
-            </div>
+            <div className="px-4 pb-2">{cardFormContent}</div>
             <DrawerFooter className="pt-2">
               <div className="flex gap-3">
                 <Button
@@ -376,9 +379,7 @@ export default function DeckDetailPage({ params }: DeckDetailPageProps) {
                 {editingCard ? "Edit Flashcard" : "Add New Flashcard"}
               </DialogTitle>
             </DialogHeader>
-            <div className="py-4">
-              <CardFormContent />
-            </div>
+            <div className="py-4">{cardFormContent}</div>
             <div className="flex gap-3">
               <Button
                 variant="outline"

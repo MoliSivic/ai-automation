@@ -26,7 +26,6 @@ import {
 } from "lucide-react";
 import { useAppStore } from "@/stores/appStore";
 import { useToast } from "@/hooks/use-toast";
-import { generateMockCards } from "@/lib/mockData";
 
 interface GeneratedCard {
   front_text: string;
@@ -70,26 +69,80 @@ export default function AIGeneratePage() {
 
     setIsGenerating(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      const res = await fetch("/api/generate-cards", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studyText,
+          cardCount: cardCount[0],
+          style,
+          model: settings.ai_model,
+        }),
+      });
 
-    const cards = generateMockCards(studyText, cardCount[0]);
-    setGeneratedCards(cards);
-    setStep("review");
-    setIsGenerating(false);
+      const data = await res.json();
 
-    toast({
-      title: "Cards generated!",
-      description: `${cards.length} flashcards created. Review and edit before saving.`,
-    });
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to generate cards.");
+      }
+
+      setGeneratedCards(data.cards);
+      setStep("review");
+      toast({
+        title: "Cards generated!",
+        description: `${data.cards.length} flashcards created. Review and edit before saving.`,
+      });
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Something went wrong.";
+      toast({
+        title: "Generation failed",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleRegenerate = async () => {
     setIsGenerating(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    const cards = generateMockCards(studyText, cardCount[0]);
-    setGeneratedCards(cards);
-    setIsGenerating(false);
-    toast({ title: "Cards regenerated!" });
+
+    try {
+      const res = await fetch("/api/generate-cards", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studyText,
+          cardCount: cardCount[0],
+          style,
+          model: settings.ai_model,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to regenerate cards.");
+      }
+
+      setGeneratedCards(data.cards);
+      toast({
+        title: "Cards regenerated!",
+        description: `${data.cards.length} new flashcards ready.`,
+      });
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Something went wrong.";
+      toast({
+        title: "Regeneration failed",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleRemoveCard = (index: number) => {
@@ -106,7 +159,7 @@ export default function AIGeneratePage() {
     );
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (generatedCards.length === 0) {
       toast({
         title: "No cards to save",
@@ -116,8 +169,19 @@ export default function AIGeneratePage() {
       return;
     }
 
-    const newDeck = createDeck(deckTitle.trim(), "AI-generated flashcard deck");
-    addCardsFromAI(newDeck.id, generatedCards);
+    const newDeck = await createDeck(
+      deckTitle.trim(),
+      "AI-generated flashcard deck",
+    );
+    if (!newDeck) {
+      toast({
+        title: "Error",
+        description: "Failed to create deck. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    await addCardsFromAI(newDeck.id, generatedCards);
 
     toast({
       title: "Deck created!",
@@ -252,8 +316,7 @@ export default function AIGeneratePage() {
               </Button>
 
               <p className="text-[10px] sm:text-xs text-center text-muted-foreground">
-                Note: This demo uses mock data. In production, this would
-                connect to the Gemini API.
+                Powered by Google Gemini AI
               </p>
             </div>
           </div>

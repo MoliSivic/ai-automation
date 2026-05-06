@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sparkles, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAppStore } from "@/stores/appStore";
+import { createClient } from "@/lib/supabase/client";
+
+const IS_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -15,8 +19,39 @@ export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(true);
   const { toast } = useToast();
   const router = useRouter();
+  const updatePassword = useAppStore((state) => state.updatePassword);
+
+  // Verify the user has a valid recovery session before allowing password reset
+  useEffect(() => {
+    if (IS_MOCK) {
+      setIsVerifying(false);
+      return;
+    }
+
+    const verifySession = async () => {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        toast({
+          title: "Invalid or expired link",
+          description: "Please request a new password reset link.",
+          variant: "destructive",
+        });
+        router.replace("/forgot-password");
+        return;
+      }
+
+      setIsVerifying(false);
+    };
+
+    verifySession();
+  }, [router, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,17 +76,37 @@ export default function ResetPasswordPage() {
 
     setIsLoading(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const success = await updatePassword(password);
 
     setIsLoading(false);
 
-    toast({
-      title: "Password reset successful!",
-      description: "You can now log in with your new password.",
-    });
-
-    router.push("/login");
+    if (success) {
+      toast({
+        title: "Password reset successful!",
+        description: "You can now log in with your new password.",
+      });
+      router.push("/login");
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to reset password. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
+
+  if (isVerifying) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/30">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground text-sm">
+            Verifying your reset link...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8 sm:py-12 bg-muted/30">

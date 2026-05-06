@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "Master anything with AI-powered flashcards",
 };
 
+import { AuthInitializer } from "@/components/auth-initializer";
+
 export default function RootLayout({
   children,
 }: {
@@ -15,7 +17,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <head>
+        {/* Prevent flash of wrong theme on load */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'){document.documentElement.classList.add('dark')}else if(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches){document.documentElement.classList.add('dark')}}catch(e){}})()`,
+          }}
+        />
+      </head>
+      <body suppressHydrationWarning>
+        <AuthInitializer />
         {children}
         <Toaster />
         <Sonner />

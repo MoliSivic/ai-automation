@@ -19,7 +19,7 @@ export default function CreateDeckPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title.trim()) {
@@ -33,7 +33,8 @@ export default function CreateDeckPage() {
 
     setIsLoading(true);
     try {
-      const newDeck = createDeck(title.trim(), description.trim());
+      const newDeck = await createDeck(title.trim(), description.trim());
+      if (!newDeck) throw new Error("Failed to create deck");
       toast({
         title: "Deck created!",
         description: "Now add some flashcards to your deck.",
