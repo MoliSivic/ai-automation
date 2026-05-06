@@ -542,9 +542,39 @@ function createSupabaseStore(
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (!error && data) {
-        set(() => ({ decks: data }));
+      if (error || !data) return;
+      const fetchedDecks = data as Deck[];
+
+      if (fetchedDecks.length === 0) {
+        set(() => ({ decks: [] }));
+        return;
       }
+
+      const deckIds = fetchedDecks.map((deck) => deck.id);
+      const { data: cardRows, error: cardsError } = await supabase
+        .from("cards")
+        .select("deck_id")
+        .in("deck_id", deckIds);
+
+      if (cardsError || !cardRows) {
+        set(() => ({ decks: fetchedDecks }));
+        return;
+      }
+
+      const cardCountByDeck = new Map<string, number>();
+      for (const card of cardRows) {
+        cardCountByDeck.set(
+          card.deck_id,
+          (cardCountByDeck.get(card.deck_id) ?? 0) + 1,
+        );
+      }
+
+      const decksWithSyncedCounts = fetchedDecks.map((deck) => ({
+        ...deck,
+        card_count: cardCountByDeck.get(deck.id) ?? 0,
+      }));
+
+      set(() => ({ decks: decksWithSyncedCounts }));
     },
 
     fetchCards: async (deckId: string) => {
@@ -558,6 +588,9 @@ function createSupabaseStore(
       if (!error && data) {
         set((state) => ({
           cards: { ...state.cards, [deckId]: data },
+          decks: state.decks.map((deck) =>
+            deck.id === deckId ? { ...deck, card_count: data.length } : deck,
+          ),
         }));
       }
     },
