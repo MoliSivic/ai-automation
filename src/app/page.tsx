@@ -74,7 +74,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
@@ -86,7 +85,6 @@ export default function LandingPage() {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden sm:flex items-center gap-3">
             <Link href="/login">
               <Button variant="ghost" className="font-medium">
@@ -100,7 +98,6 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             className="sm:hidden p-2 -mr-2"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -114,7 +111,6 @@ export default function LandingPage() {
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="sm:hidden bg-background border-b border-border animate-fade-in">
             <div className="container px-4 py-4 space-y-3">
@@ -133,9 +129,7 @@ export default function LandingPage() {
         )}
       </nav>
 
-      {/* Hero Section */}
       <section className="pt-24 sm:pt-32 pb-12 sm:pb-20 px-4 sm:px-6 relative overflow-hidden">
-        {/* Background decoration - hidden on mobile for performance */}
         <div className="absolute inset-0 -z-10 hidden sm:block">
           <div className="absolute top-20 left-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse-slow" />
           <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse-slow" />
@@ -180,7 +174,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features Section */}
       <section className="py-12 sm:py-20 px-4 sm:px-6 bg-muted/50">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-8 sm:mb-12">
@@ -215,7 +208,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Demo Section */}
       <section className="py-12 sm:py-20 px-4 sm:px-6">
         <div className="container mx-auto max-w-6xl">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
@@ -247,15 +239,12 @@ export default function LandingPage() {
               </Link>
             </div>
 
-            {/* Flashcard Preview */}
             <div className="relative order-1 lg:order-2">
               <div className="flashcard-container mx-auto max-w-sm sm:max-w-md">
                 <div className="relative">
-                  {/* Stacked cards effect - simplified on mobile */}
                   <div className="absolute inset-0 bg-card rounded-2xl card-shadow rotate-3 translate-y-2 hidden sm:block" />
                   <div className="absolute inset-0 bg-card rounded-2xl card-shadow -rotate-2 translate-y-1 hidden sm:block" />
 
-                  {/* Main card */}
                   <div className="relative bg-card rounded-2xl p-6 sm:p-8 card-shadow-elevated gradient-border min-h-[220px] sm:min-h-[280px] flex flex-col justify-center animate-float">
                     <div className="absolute top-3 sm:top-4 right-3 sm:right-4 text-xs text-muted-foreground font-medium">
                       1 / 5
@@ -279,7 +268,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-12 sm:py-20 px-4 sm:px-6">
         <div className="container mx-auto max-w-4xl">
           <div className="gradient-bg rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 text-center text-primary-foreground relative overflow-hidden">
@@ -307,7 +295,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="py-8 sm:py-12 px-4 sm:px-6 border-t border-border">
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">

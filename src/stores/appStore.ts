@@ -16,17 +16,14 @@ import {
 } from "@/lib/mockData";
 
 interface AppState {
-  // Auth state
   isAuthenticated: boolean;
   user: User | null;
 
-  // Data
   decks: Deck[];
   cards: Record<string, Card[]>;
   settings: Settings;
   studySessions: StudySession[];
 
-  // Actions - Auth
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   signup: (
@@ -35,12 +32,10 @@ interface AppState {
     fullName: string,
   ) => Promise<boolean>;
 
-  // Actions - Decks
   createDeck: (title: string, description: string) => Deck;
   updateDeck: (deckId: string, title: string, description: string) => void;
   deleteDeck: (deckId: string) => void;
 
-  // Actions - Cards
   addCard: (deckId: string, frontText: string, backText: string) => Card;
   updateCard: (
     cardId: string,
@@ -54,11 +49,9 @@ interface AppState {
     cards: Omit<Card, "id" | "deck_id" | "created_at" | "updated_at">[],
   ) => void;
 
-  // Actions - Settings
   updateSettings: (newSettings: Partial<Settings>) => void;
   setTheme: (theme: string) => void;
 
-  // Actions - Study
   createStudySession: (
     deckId: string,
     knownCount: number,
@@ -69,7 +62,6 @@ interface AppState {
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
-      // Initial state
       isAuthenticated: false,
       user: null,
       decks: [],
@@ -77,9 +69,7 @@ export const useAppStore = create<AppState>()(
       settings: mockSettings,
       studySessions: [],
 
-      // Auth actions
       login: async (email: string, password: string) => {
-        // Mock login - accept any valid email format
         if (email && password.length >= 6) {
           set({
             isAuthenticated: true,
@@ -122,7 +112,6 @@ export const useAppStore = create<AppState>()(
         return false;
       },
 
-      // Deck actions
       createDeck: (title: string, description: string) => {
         const newDeck: Deck = {
           id: `deck-${Date.now()}`,
@@ -165,7 +154,6 @@ export const useAppStore = create<AppState>()(
         });
       },
 
-      // Card actions
       addCard: (deckId: string, frontText: string, backText: string) => {
         const deckCards = get().cards[deckId] || [];
         const newCard: Card = {
@@ -270,7 +258,6 @@ export const useAppStore = create<AppState>()(
         }));
       },
 
-      // Settings actions
       updateSettings: (newSettings: Partial<Settings>) => {
         set((state) => ({
           settings: {
@@ -294,7 +281,6 @@ export const useAppStore = create<AppState>()(
         }
       },
 
-      // Study actions
       createStudySession: (
         deckId: string,
         knownCount: number,

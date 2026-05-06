@@ -26,7 +26,6 @@ export default function StudyModePage({ params }: StudyModePageProps) {
   const deck = decks.find((d) => d.id === deckId);
   const deckCards = deckId ? cards[deckId] || [] : [];
 
-  // Shuffle cards if setting enabled
   const studyCards = useMemo(() => {
     if (settings.shuffle_enabled) {
       return [...deckCards].sort(() => Math.random() - 0.5);
@@ -75,7 +74,6 @@ export default function StudyModePage({ params }: StudyModePageProps) {
     if (currentIndex < totalCards - 1) {
       setTimeout(() => setCurrentIndex((prev) => prev + 1), 200);
     } else {
-      // Session complete
       createStudySession(deck.id, knownCards.size + 1, totalCards);
       setIsComplete(true);
     }
@@ -96,7 +94,6 @@ export default function StudyModePage({ params }: StudyModePageProps) {
     setIsComplete(false);
   };
 
-  // Completion screen
   if (isComplete) {
     const percentage = Math.round((knownCards.size / totalCards) * 100);
     return (
@@ -162,7 +159,6 @@ export default function StudyModePage({ params }: StudyModePageProps) {
 
   return (
     <div className="min-h-screen bg-background flex flex-col overflow-hidden">
-      {/* Header */}
       <header className="flex-shrink-0 border-b border-border bg-background/80 backdrop-blur-md z-10">
         <div className="container mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
           <Link
@@ -184,12 +180,9 @@ export default function StudyModePage({ params }: StudyModePageProps) {
         </div>
       </header>
 
-      {/* Main Content Area - Flex container for card and buttons */}
       <div className="flex-1 flex flex-col min-h-0">
-        {/* Flashcard Area */}
         <main className="flex-1 flex items-center justify-center p-4 sm:p-6 overflow-hidden">
           <div className="w-full max-w-2xl">
-            {/* Navigation with deck title */}
             <div className="flex items-center justify-between mb-4">
               <Button
                 variant="ghost"
@@ -214,7 +207,6 @@ export default function StudyModePage({ params }: StudyModePageProps) {
               </Button>
             </div>
 
-            {/* Card */}
             <div
               className="flashcard-container cursor-pointer"
               onClick={() => setIsFlipped(!isFlipped)}
@@ -223,7 +215,6 @@ export default function StudyModePage({ params }: StudyModePageProps) {
                 className={`flashcard ${isFlipped ? "flipped" : ""}`}
                 style={{ height: "clamp(250px, 40vh, 400px)" }}
               >
-                {/* Front */}
                 <div className="flashcard-face absolute inset-0 bg-card rounded-2xl p-5 sm:p-8 card-shadow-elevated gradient-border flex flex-col justify-center">
                   <div className="absolute top-3 sm:top-4 left-3 sm:left-4 text-[10px] sm:text-xs text-muted-foreground font-medium px-2 py-1 bg-muted rounded">
                     Question
@@ -238,7 +229,6 @@ export default function StudyModePage({ params }: StudyModePageProps) {
                   </div>
                 </div>
 
-                {/* Back */}
                 <div className="flashcard-face flashcard-back absolute inset-0 bg-card rounded-2xl p-5 sm:p-8 card-shadow-elevated flex flex-col justify-center">
                   <div className="absolute top-3 sm:top-4 left-3 sm:left-4 text-[10px] sm:text-xs font-medium px-2 py-1 bg-primary/10 text-primary rounded">
                     Answer
@@ -254,7 +244,6 @@ export default function StudyModePage({ params }: StudyModePageProps) {
           </div>
         </main>
 
-        {/* Action Buttons - Fixed at bottom */}
         <div className="flex-shrink-0 bg-background border-t border-border p-4 sm:p-6">
           <div className="max-w-2xl mx-auto">
             <div className="flex gap-3 sm:gap-4 justify-center">

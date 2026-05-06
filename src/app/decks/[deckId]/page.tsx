@@ -144,7 +144,6 @@ export default function DeckDetailPage({ params }: DeckDetailPageProps) {
     setEditingCard(null);
   };
 
-  // Card form content (shared between Dialog and Drawer)
   const CardFormContent = () => (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -178,7 +177,6 @@ export default function DeckDetailPage({ params }: DeckDetailPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
           <Link href="/dashboard" className="flex items-center gap-2">
@@ -201,7 +199,6 @@ export default function DeckDetailPage({ params }: DeckDetailPageProps) {
           Back to Dashboard
         </Link>
 
-        {/* Deck Header */}
         <div className="bg-card rounded-xl p-4 sm:p-6 card-shadow-elevated mb-6 sm:mb-8">
           <div className="flex flex-col gap-4">
             <div className="flex-1 min-w-0">
@@ -253,7 +250,6 @@ export default function DeckDetailPage({ params }: DeckDetailPageProps) {
           </div>
         </div>
 
-        {/* Cards Section */}
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <h2 className="font-display text-lg sm:text-xl font-semibold">
             Flashcards
@@ -341,7 +337,6 @@ export default function DeckDetailPage({ params }: DeckDetailPageProps) {
         )}
       </main>
 
-      {/* Add/Edit Card - Use Drawer on mobile, Dialog on desktop */}
       {isMobile ? (
         <Drawer open={isAddingCard || !!editingCard} onOpenChange={closeDialog}>
           <DrawerContent>
@@ -405,7 +400,6 @@ export default function DeckDetailPage({ params }: DeckDetailPageProps) {
         </Dialog>
       )}
 
-      {/* Delete Confirmation */}
       <AlertDialog
         open={!!cardToDelete}
         onOpenChange={() => setCardToDelete(null)}

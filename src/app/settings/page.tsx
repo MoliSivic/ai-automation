@@ -82,7 +82,6 @@ export default function SettingsPage() {
       cards_per_session: cardsPerSession[0],
     });
 
-    // Apply theme
     document.documentElement.setAttribute("data-theme", selectedTheme);
 
     toast({
@@ -98,7 +97,6 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
           <Link href="/dashboard" className="flex items-center gap-2">
@@ -126,7 +124,6 @@ export default function SettingsPage() {
         </h1>
 
         <div className="space-y-5 sm:space-y-6">
-          {/* Profile Section */}
           <div className="bg-card rounded-xl p-5 sm:p-6 card-shadow">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full gradient-bg flex items-center justify-center">
@@ -166,7 +163,6 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Theme Section */}
           <div className="bg-card rounded-xl p-5 sm:p-6 card-shadow">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -205,7 +201,6 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Study Preferences */}
           <div className="bg-card rounded-xl p-5 sm:p-6 card-shadow">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -267,7 +262,6 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* AI Settings */}
           <div className="bg-card rounded-xl p-5 sm:p-6 card-shadow">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -298,7 +292,6 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3">
             <Button
               onClick={handleSave}

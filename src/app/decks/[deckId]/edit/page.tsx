@@ -74,7 +74,6 @@ export default function EditDeckPage({ params }: EditDeckPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
           <Link href="/dashboard" className="flex items-center gap-2">

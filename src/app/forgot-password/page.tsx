@@ -28,7 +28,6 @@ export default function ForgotPasswordPage() {
 
     setIsLoading(true);
 
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
     setIsLoading(false);
@@ -42,14 +41,12 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8 sm:py-12 bg-muted/30">
-      {/* Background decoration */}
       <div className="fixed inset-0 -z-10 hidden sm:block">
         <div className="absolute top-20 left-1/4 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
       </div>
 
       <div className="w-full max-w-md">
-        {/* Logo */}
         <Link
           href="/"
           className="flex items-center justify-center gap-2 mb-6 sm:mb-8"
@@ -62,7 +59,6 @@ export default function ForgotPasswordPage() {
           </span>
         </Link>
 
-        {/* Forgot Password Card */}
         <div className="bg-card rounded-2xl p-5 sm:p-8 card-shadow-elevated">
           {!isSubmitted ? (
             <>

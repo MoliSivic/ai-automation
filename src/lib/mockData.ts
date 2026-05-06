@@ -1,5 +1,3 @@
-// Mock data for Flash Card Generator
-
 export interface User {
   id: string;
   email: string;
@@ -48,7 +46,6 @@ export interface StudySession {
   total_count: number;
 }
 
-// Mock current user
 export const mockUser: User = {
   id: "user-1",
   email: "demo@flashcards.app",
@@ -56,7 +53,6 @@ export const mockUser: User = {
   created_at: "2024-01-01T00:00:00Z",
 };
 
-// Mock decks
 export const mockDecks: Deck[] = [
   {
     id: "deck-1",
@@ -97,7 +93,6 @@ export const mockDecks: Deck[] = [
   },
 ];
 
-// Mock cards for deck-1 (JavaScript Fundamentals)
 export const mockCards: Record<string, Card[]> = {
   "deck-1": [
     {
@@ -229,7 +224,6 @@ export const mockCards: Record<string, Card[]> = {
   ],
 };
 
-// Mock settings
 export const mockSettings: Settings = {
   id: "settings-1",
   user_id: "user-1",
@@ -241,7 +235,6 @@ export const mockSettings: Settings = {
   updated_at: "2024-01-20T00:00:00Z",
 };
 
-// Mock study sessions
 export const mockStudySessions: StudySession[] = [
   {
     id: "session-1",
@@ -263,7 +256,6 @@ export const mockStudySessions: StudySession[] = [
   },
 ];
 
-// AI generation mock
 export const generateMockCards = (
   text: string,
   count: number,

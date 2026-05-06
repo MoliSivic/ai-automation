@@ -35,7 +35,6 @@
 
     --radius: 0.75rem;
 
-    /* Theme gradients */
     --gradient-start: 221 83% 53%;
     --gradient-end: 250 83% 60%;
     --gradient-primary: linear-gradient(
@@ -49,7 +48,6 @@
       hsl(250 83% 60% / 0.1)
     );
 
-    /* Custom shadows */
     --shadow-card:
       0 4px 6px -1px hsl(222 47% 11% / 0.05),
       0 2px 4px -2px hsl(222 47% 11% / 0.05);
@@ -58,7 +56,6 @@
       0 4px 6px -4px hsl(222 47% 11% / 0.08);
     --shadow-glow: 0 0 40px -10px hsl(var(--primary) / 0.3);
 
-    /* Sidebar */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -68,40 +65,34 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    /* Success color */
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
   }
 
-  /* Ocean Theme (Default) */
   [data-theme="ocean"] {
     --gradient-start: 221 83% 53%;
     --gradient-end: 199 89% 48%;
     --primary: 221 83% 53%;
   }
 
-  /* Sunset Theme */
   [data-theme="sunset"] {
     --gradient-start: 25 95% 53%;
     --gradient-end: 340 82% 52%;
     --primary: 25 95% 53%;
   }
 
-  /* Forest Theme */
   [data-theme="forest"] {
     --gradient-start: 142 76% 36%;
     --gradient-end: 168 84% 39%;
     --primary: 142 76% 36%;
   }
 
-  /* Lavender Theme */
   [data-theme="lavender"] {
     --gradient-start: 271 91% 65%;
     --gradient-end: 280 87% 67%;
     --primary: 271 91% 65%;
   }
 
-  /* Midnight Theme */
   [data-theme="midnight"] {
     --gradient-start: 234 89% 74%;
     --gradient-end: 240 67% 47%;
@@ -222,7 +213,6 @@
     box-shadow: var(--shadow-glow);
   }
 
-  /* Flashcard flip animation */
   .flashcard-container {
     perspective: 1000px;
     width: 100%;
@@ -250,14 +240,12 @@
     transform: rotateY(180deg);
   }
 
-  /* Smooth page transitions */
   .page-transition {
     transition-property: all;
     transition-duration: 300ms;
     transition-timing-function: ease-out;
   }
 
-  /* Focus ring */
   .focus-ring:focus {
     outline: none;
     box-shadow:

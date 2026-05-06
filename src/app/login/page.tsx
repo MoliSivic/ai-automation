@@ -51,14 +51,12 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8 sm:py-12 bg-muted/30">
-      {/* Background decoration */}
       <div className="fixed inset-0 -z-10 hidden sm:block">
         <div className="absolute top-20 left-1/4 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
       </div>
 
       <div className="w-full max-w-md">
-        {/* Logo */}
         <Link
           href="/"
           className="flex items-center justify-center gap-2 mb-6 sm:mb-8"
@@ -71,7 +69,6 @@ export default function LoginPage() {
           </span>
         </Link>
 
-        {/* Login Card */}
         <div className="bg-card rounded-2xl p-5 sm:p-8 card-shadow-elevated">
           <div className="text-center mb-6 sm:mb-8">
             <h1 className="font-display text-xl sm:text-2xl font-bold mb-1 sm:mb-2">
@@ -149,7 +146,6 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          {/* Divider */}
           <div className="relative my-5 sm:my-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-border" />
@@ -161,7 +157,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Google Sign In */}
           <Button
             type="button"
             variant="outline"

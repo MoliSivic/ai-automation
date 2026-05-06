@@ -73,7 +73,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
           <Link href="/dashboard" className="flex items-center gap-2">
@@ -85,7 +84,6 @@ export default function DashboardPage() {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden sm:flex items-center gap-2 sm:gap-3">
             <Link href="/settings">
               <Button variant="ghost" size="icon">
@@ -113,7 +111,6 @@ export default function DashboardPage() {
             </DropdownMenu>
           </div>
 
-          {/* Mobile Menu */}
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild className="sm:hidden">
               <Button variant="ghost" size="icon" className="-mr-2">
@@ -164,9 +161,7 @@ export default function DashboardPage() {
         </div>
       </nav>
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-6 sm:py-8 max-w-6xl">
-        {/* Header */}
         <div className="flex flex-col gap-4 mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -178,7 +173,6 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            {/* Desktop Action Buttons */}
             <div className="hidden sm:flex gap-3">
               <Link href="/decks/ai-generate">
                 <Button variant="outline" className="gap-2">
@@ -195,7 +189,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Search and Mobile Actions */}
           <div className="flex gap-2 sm:gap-3">
             <div className="relative flex-1 sm:max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
@@ -208,7 +201,6 @@ export default function DashboardPage() {
               />
             </div>
 
-            {/* Mobile Action Buttons */}
             <div className="flex sm:hidden gap-2">
               <Link href="/decks/ai-generate">
                 <Button variant="outline" size="icon" className="h-10 w-10">
@@ -227,7 +219,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Decks Grid */}
         {filteredDecks.length === 0 ? (
           <div className="text-center py-12 sm:py-16">
             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
@@ -335,7 +326,6 @@ export default function DashboardPage() {
         )}
       </main>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog
         open={!!deckToDelete}
         onOpenChange={() => setDeckToDelete(null)}
