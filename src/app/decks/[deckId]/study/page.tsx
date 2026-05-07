@@ -88,22 +88,23 @@ export default function StudyModePage({ params }: StudyModePageProps) {
   const progress = (answeredCards / totalCards) * 100;
 
   const handleKnow = () => {
-    setKnownCards((prev) => new Set([...prev, currentCard.id]));
-    goToNext();
+    const newKnown = new Set([...knownCards, currentCard.id]);
+    setKnownCards(newKnown);
+    goToNext(newKnown.size);
   };
 
   const handleDontKnow = () => {
     setUnknownCards((prev) => new Set([...prev, currentCard.id]));
-    goToNext();
+    goToNext(knownCards.size);
   };
 
-  const goToNext = () => {
+  const goToNext = (knownCount: number) => {
     setIsFlipped(false);
     if (currentIndex < totalCards - 1) {
       setTimeout(() => setCurrentIndex((prev) => prev + 1), 200);
     } else {
       setIsComplete(true);
-      createStudySession(deck.id, knownCards.size + 1, totalCards);
+      createStudySession(deck.id, knownCount, totalCards);
     }
   };
 
