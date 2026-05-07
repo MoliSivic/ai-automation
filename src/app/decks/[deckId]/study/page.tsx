@@ -102,9 +102,8 @@ export default function StudyModePage({ params }: StudyModePageProps) {
     if (currentIndex < totalCards - 1) {
       setTimeout(() => setCurrentIndex((prev) => prev + 1), 200);
     } else {
-      createStudySession(deck.id, knownCards.size + 1, totalCards).then(() => {
-        setIsComplete(true);
-      });
+      setIsComplete(true);
+      createStudySession(deck.id, knownCards.size + 1, totalCards);
     }
   };
 
