@@ -90,15 +90,19 @@ export default function StudyModePage({ params }: StudyModePageProps) {
   const handleKnow = () => {
     const newKnown = new Set([...knownCards, currentCard.id]);
     setKnownCards(newKnown);
-    goToNext(newKnown.size);
+    advance(newKnown.size);
   };
 
   const handleDontKnow = () => {
-    setUnknownCards((prev) => new Set([...prev, currentCard.id]));
-    goToNext(knownCards.size);
+    const newUnknown = new Set([...unknownCards, currentCard.id]);
+    setUnknownCards(newUnknown);
+    advance(knownCards.size);
   };
 
-  const goToNext = (knownCount: number) => {
+  const isCurrentCardAnswered =
+    knownCards.has(currentCard.id) || unknownCards.has(currentCard.id);
+
+  const advance = (knownCount: number) => {
     setIsFlipped(false);
     if (currentIndex < totalCards - 1) {
       setTimeout(() => setCurrentIndex((prev) => prev + 1), 200);
@@ -228,8 +232,15 @@ export default function StudyModePage({ params }: StudyModePageProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={goToNext}
-                disabled={currentIndex === totalCards - 1}
+                onClick={() => {
+                  if (isCurrentCardAnswered && currentIndex < totalCards - 1) {
+                    setIsFlipped(false);
+                    setCurrentIndex((prev) => prev + 1);
+                  }
+                }}
+                disabled={
+                  currentIndex === totalCards - 1 || !isCurrentCardAnswered
+                }
                 className="h-8 w-8 sm:h-10 sm:w-10"
               >
                 <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -281,6 +292,7 @@ export default function StudyModePage({ params }: StudyModePageProps) {
                 variant="outline"
                 className="flex-1 max-w-[160px] sm:max-w-[180px] h-12 sm:h-14 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground text-sm sm:text-base font-medium"
                 onClick={handleDontKnow}
+                disabled={isCurrentCardAnswered}
               >
                 <X className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 Don&apos;t Know
@@ -289,6 +301,7 @@ export default function StudyModePage({ params }: StudyModePageProps) {
                 size="lg"
                 className="flex-1 max-w-[160px] sm:max-w-[180px] h-12 sm:h-14 bg-success text-success-foreground hover:bg-success/90 text-sm sm:text-base font-medium"
                 onClick={handleKnow}
+                disabled={isCurrentCardAnswered}
               >
                 <Check className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 Know
