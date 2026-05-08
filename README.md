@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FlashGenius AI Flashcard Automation
 
-## Getting Started
+This project helps students turn study notes into Anki flashcards.
 
-First, run the development server:
+Workflow:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```text
+Frontend: Next.js + React + TypeScript + Tailwind CSS
+        ↓
+Backend: Python FastAPI
+        ↓
+Automation Worker: watchdog + pypdf + Gemini + genanki
+        ↓
+Database: PostgreSQL
+        ↓
+Output: .apkg Anki deck
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Project Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `frontend/` - Next.js frontend. Supabase is used for authentication only.
+- `backend/` - FastAPI backend for decks, cards, settings, study sessions, uploads, Gemini generation, local storage, watchdog imports, and Anki export.
+- `backend/storage/inbox/` - drop `.pdf` or `.txt` files here when running the watchdog worker.
+- `backend/storage/exports/` - generated `.apkg` files.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Frontend Setup
 
-## Learn More
+```bash
+cd frontend
+cp .env.example .env.local
+npm install
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Required frontend env values:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+NEXT_PUBLIC_USE_MOCK=false
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Backend Setup
 
-## Deploy on Vercel
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+createdb "ai-automation-db"
+uvicorn app.main:app --reload --port 8000
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Required backend env values:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+DATABASE_URL=postgresql+psycopg://postgres:YOUR_PASSWORD@localhost:5432/ai-automation-db
+SUPABASE_URL=your-supabase-project-url
+SUPABASE_ANON_KEY=your-supabase-anon-key
+GEMINI_API_KEY=your-gemini-api-key
+```
+
+## Watchdog Worker
+
+Set `WORKER_USER_ID` in `backend/.env` to the Supabase user ID that should own decks created from dropped files.
+
+```bash
+cd backend
+source .venv/bin/activate
+python -m app.worker
+```
+
+Then drop a `.pdf` or `.txt` file into `backend/storage/inbox/`.
+
+## Verification
+
+```bash
+cd frontend
+npm run lint
+npx tsc --noEmit
+npm run build
+cd ..
+cd backend && pytest tests
+```

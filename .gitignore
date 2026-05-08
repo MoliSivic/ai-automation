@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -12,13 +12,17 @@
 
 # testing
 /coverage
+/.playwright-mcp
+.pytest_cache/
+__pycache__/
+*.py[cod]
 
 # next.js
-/.next/
-/out/
+.next/
+out/
 
 # production
-/build
+build/
 
 # misc
 .DS_Store
@@ -32,6 +36,16 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!frontend/.env.example
+!backend/.env.example
+
+# local backend generated files
+/backend/storage/uploads/*
+/backend/storage/inbox/*
+/backend/storage/exports/*
+!/backend/storage/uploads/.gitkeep
+!/backend/storage/inbox/.gitkeep
+!/backend/storage/exports/.gitkeep
 
 # vercel
 .vercel
