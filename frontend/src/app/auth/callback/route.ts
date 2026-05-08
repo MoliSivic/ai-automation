@@ -1,12 +1,42 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+const DEFAULT_AUTH_DESTINATION = "/dashboard";
+const PASSWORD_RESET_DESTINATION = "/reset-password";
+const EMAIL_OTP_TYPES = [
+  "signup",
+  "invite",
+  "magiclink",
+  "recovery",
+  "email_change",
+  "email",
+] as const;
+
+type EmailOtpType = (typeof EMAIL_OTP_TYPES)[number];
+
+function isEmailOtpType(type: string | null): type is EmailOtpType {
+  return EMAIL_OTP_TYPES.some((allowedType) => allowedType === type);
+}
+
+function getSafeNextPath(next: string | null) {
+  if (!next || !next.startsWith("/") || next.startsWith("//")) {
+    return DEFAULT_AUTH_DESTINATION;
+  }
+
+  try {
+    const nextUrl = new URL(next, "https://flashgenius.local");
+    return `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
+  } catch {
+    return DEFAULT_AUTH_DESTINATION;
+  }
+}
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type");
-  const next = searchParams.get("next") ?? "/dashboard";
+  const next = getSafeNextPath(searchParams.get("next"));
 
   // Handle Supabase error params (e.g. expired link, invalid token)
   const error_param = searchParams.get("error");
@@ -40,15 +70,24 @@ export async function GET(request: Request) {
 
   // Handle email confirmation and password reset (token_hash-based flow — legacy/implicit)
   if (token_hash && type) {
+    if (!isEmailOtpType(type)) {
+      const errorUrl = new URL("/login", origin);
+      errorUrl.searchParams.set(
+        "error",
+        "Invalid verification type. Please request a new email link.",
+      );
+      return NextResponse.redirect(errorUrl.toString());
+    }
+
     const { error } = await supabase.auth.verifyOtp({
       token_hash,
-      type: type as "signup" | "recovery" | "email",
+      type,
     });
 
     if (!error) {
       // For password recovery, redirect to reset-password page
       if (type === "recovery") {
-        return NextResponse.redirect(`${origin}/reset-password`);
+        return NextResponse.redirect(`${origin}${PASSWORD_RESET_DESTINATION}`);
       }
       // For email confirmation, redirect to dashboard (or next)
       return NextResponse.redirect(`${origin}${next}`);

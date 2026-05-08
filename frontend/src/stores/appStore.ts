@@ -110,6 +110,12 @@ function getSupabase() {
   return createClient();
 }
 
+function getAuthCallbackUrl(nextPath: "/dashboard" | "/reset-password") {
+  const callbackUrl = new URL("/auth/callback", window.location.origin);
+  callbackUrl.searchParams.set("next", nextPath);
+  return callbackUrl.toString();
+}
+
 let mockIdCounter = 1000;
 function nextMockId() {
   return `mock-${++mockIdCounter}`;
@@ -453,7 +459,7 @@ function createSupabaseStore(
         password,
         options: {
           data: { full_name: fullName },
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          emailRedirectTo: getAuthCallbackUrl("/dashboard"),
         },
       });
 
@@ -500,7 +506,7 @@ function createSupabaseStore(
       await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          redirectTo: getAuthCallbackUrl("/dashboard"),
           queryParams: {
             access_type: "offline",
             prompt: "consent",
@@ -515,7 +521,7 @@ function createSupabaseStore(
         type: "signup",
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          emailRedirectTo: getAuthCallbackUrl("/dashboard"),
         },
       });
       return !error;
@@ -524,7 +530,7 @@ function createSupabaseStore(
     resetPassword: async (email: string) => {
       const supabase = getSupabase();
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+        redirectTo: getAuthCallbackUrl("/reset-password"),
       });
       return !error;
     },

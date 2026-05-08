@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,49 @@ import { useAppStore } from "@/stores/appStore";
 import { useToast } from "@/hooks/use-toast";
 
 const IS_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
+const SIGNUP_DRAFT_KEY = "flashgenius.signupDraft";
+
+interface SignupDraft {
+  fullName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  agreedToTerms: boolean;
+}
+
+function readSignupDraft(): Partial<SignupDraft> {
+  if (typeof window === "undefined") return {};
+
+  try {
+    const rawDraft = window.sessionStorage.getItem(SIGNUP_DRAFT_KEY);
+    return rawDraft ? JSON.parse(rawDraft) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeSignupDraft(draft: SignupDraft) {
+  if (typeof window === "undefined") return;
+
+  const hasDraft =
+    draft.fullName ||
+    draft.email ||
+    draft.password ||
+    draft.confirmPassword ||
+    draft.agreedToTerms;
+
+  if (!hasDraft) {
+    window.sessionStorage.removeItem(SIGNUP_DRAFT_KEY);
+    return;
+  }
+
+  window.sessionStorage.setItem(SIGNUP_DRAFT_KEY, JSON.stringify(draft));
+}
+
+function clearSignupDraft() {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.removeItem(SIGNUP_DRAFT_KEY);
+}
 
 function getPasswordStrength(password: string) {
   let score = 0;
@@ -62,13 +105,18 @@ function getPasswordStrength(password: string) {
 }
 
 export default function SignupPage() {
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [initialDraft] = useState(() => readSignupDraft());
+  const [fullName, setFullName] = useState(initialDraft.fullName ?? "");
+  const [email, setEmail] = useState(initialDraft.email ?? "");
+  const [password, setPassword] = useState(initialDraft.password ?? "");
+  const [confirmPassword, setConfirmPassword] = useState(
+    initialDraft.confirmPassword ?? "",
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(
+    initialDraft.agreedToTerms ?? false,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const signup = useAppStore((state) => state.signup);
@@ -86,6 +134,21 @@ export default function SignupPage() {
     confirmPassword.length > 0 && password === confirmPassword;
   const passwordsMismatch =
     confirmPassword.length > 0 && password !== confirmPassword;
+
+  const currentDraft = useMemo<SignupDraft>(
+    () => ({
+      fullName,
+      email,
+      password,
+      confirmPassword,
+      agreedToTerms,
+    }),
+    [agreedToTerms, confirmPassword, email, fullName, password],
+  );
+
+  useEffect(() => {
+    writeSignupDraft(currentDraft);
+  }, [currentDraft]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,6 +186,7 @@ export default function SignupPage() {
     try {
       const result = await signup(email, password, fullName);
       if (result.success && result.needsConfirmation) {
+        clearSignupDraft();
         setEmailSent(true);
         toast({
           title: "Check your email!",
@@ -131,6 +195,7 @@ export default function SignupPage() {
         });
       } else if (result.success) {
         // Email confirmation disabled — user is immediately authenticated
+        clearSignupDraft();
         toast({
           title: "Account created!",
           description: "Welcome to FlashGenius.",
@@ -473,7 +538,7 @@ export default function SignupPage() {
                 <Link
                   href="/terms"
                   className="text-primary font-medium hover:underline"
-                  target="_blank"
+                  onClick={() => writeSignupDraft(currentDraft)}
                 >
                   Terms of Service
                 </Link>{" "}
@@ -481,7 +546,7 @@ export default function SignupPage() {
                 <Link
                   href="/privacy"
                   className="text-primary font-medium hover:underline"
-                  target="_blank"
+                  onClick={() => writeSignupDraft(currentDraft)}
                 >
                   Privacy Policy
                 </Link>
