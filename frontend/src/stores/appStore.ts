@@ -16,7 +16,10 @@ import {
   mockSettings,
   mockStudySessions,
 } from "@/lib/mockData";
-import { backendFetch } from "@/lib/backend/client";
+import {
+  backendFetch,
+  isBackendConnectionError,
+} from "@/lib/backend/client";
 import { createClient } from "@/lib/supabase/client";
 
 const IS_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
@@ -114,6 +117,15 @@ function getAuthCallbackUrl(nextPath: "/dashboard" | "/reset-password") {
   const callbackUrl = new URL("/auth/callback", window.location.origin);
   callbackUrl.searchParams.set("next", nextPath);
   return callbackUrl.toString();
+}
+
+function logBackendFailure(action: string, error: unknown) {
+  if (isBackendConnectionError(error)) {
+    console.warn(`${action}: ${error.message}`);
+    return;
+  }
+
+  console.error(`${action}:`, error);
 }
 
 let mockIdCounter = 1000;
@@ -546,7 +558,7 @@ function createSupabaseStore(
         const decks = await backendFetch<Deck[]>("/api/decks");
         set(() => ({ decks }));
       } catch (error) {
-        console.error("Failed to fetch decks:", error);
+        logBackendFailure("Failed to fetch decks", error);
       }
     },
 
@@ -564,7 +576,7 @@ function createSupabaseStore(
           ),
         }));
       } catch (error) {
-        console.error("Failed to fetch cards:", error);
+        logBackendFailure("Failed to fetch cards", error);
       }
     },
 
@@ -573,7 +585,7 @@ function createSupabaseStore(
         const settings = await backendFetch<Settings>("/api/settings");
         set(() => ({ settings: { ...settings, theme: settings.theme as ThemeName } }));
       } catch (error) {
-        console.error("Failed to fetch settings:", error);
+        logBackendFailure("Failed to fetch settings", error);
       }
     },
 
@@ -583,7 +595,7 @@ function createSupabaseStore(
           await backendFetch<StudySession[]>("/api/study-sessions");
         set(() => ({ studySessions }));
       } catch (error) {
-        console.error("Failed to fetch study sessions:", error);
+        logBackendFailure("Failed to fetch study sessions", error);
       }
     },
 
@@ -600,7 +612,7 @@ function createSupabaseStore(
         }));
         return deck;
       } catch (error) {
-        console.error("Failed to create deck:", error);
+        logBackendFailure("Failed to create deck", error);
         return null;
       }
     },
@@ -618,7 +630,7 @@ function createSupabaseStore(
           ),
         }));
       } catch (error) {
-        console.error("Failed to update deck:", error);
+        logBackendFailure("Failed to update deck", error);
       }
     },
 
@@ -637,7 +649,7 @@ function createSupabaseStore(
           };
         });
       } catch (error) {
-        console.error("Failed to delete deck:", error);
+        logBackendFailure("Failed to delete deck", error);
       }
     },
 
@@ -664,7 +676,7 @@ function createSupabaseStore(
         }));
         return card;
       } catch (error) {
-        console.error("Failed to add card:", error);
+        logBackendFailure("Failed to add card", error);
         return null;
       }
     },
@@ -693,7 +705,7 @@ function createSupabaseStore(
           },
         }));
       } catch (error) {
-        console.error("Failed to update card:", error);
+        logBackendFailure("Failed to update card", error);
       }
     },
 
@@ -717,7 +729,7 @@ function createSupabaseStore(
           ),
         }));
       } catch (error) {
-        console.error("Failed to delete card:", error);
+        logBackendFailure("Failed to delete card", error);
       }
     },
 
@@ -753,7 +765,7 @@ function createSupabaseStore(
           ),
         }));
       } catch (error) {
-        console.error("Failed to save AI cards:", error);
+        logBackendFailure("Failed to save AI cards", error);
       }
     },
 
@@ -771,7 +783,7 @@ function createSupabaseStore(
 
         set(() => ({ settings: { ...settings, theme: settings.theme as ThemeName } }));
       } catch (error) {
-        console.error("Failed to update settings:", error);
+        logBackendFailure("Failed to update settings", error);
       }
     },
 
@@ -800,7 +812,7 @@ function createSupabaseStore(
           studySessions: [session, ...state.studySessions],
         }));
       } catch (error) {
-        console.error("Failed to create study session:", error);
+        logBackendFailure("Failed to create study session", error);
       }
     },
   };

@@ -55,7 +55,7 @@ cp .env.example .env.local
 Required frontend variables:
 
 ```bash
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+NEXT_PUBLIC_API_BASE_URL=/backend
 NEXT_PUBLIC_USE_MOCK=false
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key

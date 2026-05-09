@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/client";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ||
-  "http://localhost:8000";
+const CONFIGURED_API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") || "/backend";
+
+const LOCAL_API_HOSTS = new Set(["localhost", "127.0.0.1"]);
 
 export class BackendError extends Error {
   status: number;
@@ -12,6 +13,60 @@ export class BackendError extends Error {
     this.name = "BackendError";
     this.status = status;
   }
+}
+
+export class BackendConnectionError extends BackendError {
+  constructor(message: string, cause?: unknown) {
+    super(message, 0);
+    this.name = "BackendConnectionError";
+    if (cause) {
+      (this as Error & { cause?: unknown }).cause = cause;
+    }
+  }
+}
+
+export function isBackendConnectionError(
+  error: unknown,
+): error is BackendConnectionError {
+  return error instanceof BackendConnectionError;
+}
+
+function getApiBaseUrls() {
+  const urls = [CONFIGURED_API_BASE_URL];
+
+  try {
+    const configuredUrl = new URL(CONFIGURED_API_BASE_URL);
+    if (
+      configuredUrl.protocol === "http:" &&
+      LOCAL_API_HOSTS.has(configuredUrl.hostname)
+    ) {
+      const fallbackHost =
+        configuredUrl.hostname === "localhost" ? "127.0.0.1" : "localhost";
+      configuredUrl.hostname = fallbackHost;
+      urls.push(configuredUrl.toString().replace(/\/$/, ""));
+    }
+  } catch {
+    // Keep the configured value only if it is not a valid absolute URL.
+  }
+
+  return Array.from(new Set(urls));
+}
+
+async function fetchBackend(path: string, init: RequestInit) {
+  let lastError: unknown;
+
+  for (const apiBaseUrl of getApiBaseUrls()) {
+    try {
+      return await fetch(`${apiBaseUrl}${path}`, init);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw new BackendConnectionError(
+    "Backend API is not reachable. Start FastAPI on http://127.0.0.1:8000 or update NEXT_PUBLIC_API_BASE_URL.",
+    lastError,
+  );
 }
 
 async function getAccessToken() {
@@ -45,7 +100,7 @@ export async function backendFetch<T>(
     new Headers(init.headers).forEach((value, key) => headers.set(key, value));
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetchBackend(path, {
     ...init,
     headers,
   });
@@ -59,6 +114,18 @@ export async function backendFetch<T>(
     ? await response.json()
     : await response.text();
 
+  if (
+    typeof payload === "object" &&
+    payload &&
+    "backend_unavailable" in payload
+  ) {
+    const message =
+      "detail" in payload
+        ? String(payload.detail)
+        : "Backend API is not reachable.";
+    throw new BackendConnectionError(message);
+  }
+
   if (!response.ok) {
     const message =
       typeof payload === "object" && payload && "detail" in payload
@@ -66,6 +133,14 @@ export async function backendFetch<T>(
         : typeof payload === "object" && payload && "error" in payload
           ? String(payload.error)
           : "Backend request failed.";
+
+    if (
+      response.status === 503 &&
+      message.startsWith("Backend API is not reachable")
+    ) {
+      throw new BackendConnectionError(message);
+    }
+
     throw new BackendError(message, response.status);
   }
 
@@ -74,7 +149,7 @@ export async function backendFetch<T>(
 
 export async function downloadFromBackend(path: string, filename: string) {
   const headers = await authHeaders();
-  const response = await fetch(`${API_BASE_URL}${path}`, { headers });
+  const response = await fetchBackend(path, { headers });
 
   if (!response.ok) {
     let message = "Download failed.";
@@ -97,4 +172,3 @@ export async function downloadFromBackend(path: string, filename: string) {
   anchor.remove();
   URL.revokeObjectURL(url);
 }
-

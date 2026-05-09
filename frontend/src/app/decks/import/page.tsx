@@ -25,7 +25,11 @@ import {
 } from "lucide-react";
 import { useAppStore } from "@/stores/appStore";
 import { useToast } from "@/hooks/use-toast";
-import { backendFetch, downloadFromBackend } from "@/lib/backend/client";
+import {
+  backendFetch,
+  downloadFromBackend,
+  isBackendConnectionError,
+} from "@/lib/backend/client";
 
 interface ImportJob {
   id: string;
@@ -76,7 +80,11 @@ export default function ImportDeckPage() {
           });
         }
       } catch (error) {
-        console.error("Failed to refresh import job:", error);
+        if (isBackendConnectionError(error)) {
+          console.warn(`Failed to refresh import job: ${error.message}`);
+        } else {
+          console.error("Failed to refresh import job:", error);
+        }
       }
     }, 2000);
 
@@ -312,4 +320,3 @@ export default function ImportDeckPage() {
     </div>
   );
 }
-
