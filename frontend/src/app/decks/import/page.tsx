@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,7 @@ import {
   Sparkles,
   Upload,
   XCircle,
-} from "lucide-react";
+} from "@/components/ui/icons";
 import { useAppStore } from "@/stores/appStore";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -30,6 +30,7 @@ import {
   downloadFromBackend,
   isBackendConnectionError,
 } from "@/lib/backend/client";
+import { cn } from "@/lib/utils";
 
 interface ImportJob {
   id: string;
@@ -45,9 +46,32 @@ interface ImportJob {
   updated_at: string;
 }
 
+const ACCEPTED_FILE_TYPES = [
+  "application/pdf",
+  "text/plain",
+  "text/markdown",
+];
+
+function isSupportedStudyFile(candidate: File) {
+  const fileName = candidate.name.toLowerCase();
+  return (
+    fileName.endsWith(".pdf") ||
+    fileName.endsWith(".txt") ||
+    ACCEPTED_FILE_TYPES.includes(candidate.type)
+  );
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  const kilobytes = bytes / 1024;
+  if (kilobytes < 1024) return `${kilobytes.toFixed(1)} KB`;
+  return `${(kilobytes / 1024).toFixed(1)} MB`;
+}
+
 export default function ImportDeckPage() {
   const { toast } = useToast();
   const { settings, fetchDecks } = useAppStore();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [deckTitle, setDeckTitle] = useState("");
   const [cardCount, setCardCount] = useState([
@@ -57,6 +81,7 @@ export default function ImportDeckPage() {
   const [job, setJob] = useState<ImportJob | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
 
   const isWorking = useMemo(
     () => job?.status === "pending" || job?.status === "processing",
@@ -90,6 +115,42 @@ export default function ImportDeckPage() {
 
     return () => window.clearInterval(interval);
   }, [fetchDecks, isWorking, job, toast]);
+
+  const selectStudyFile = (nextFile: File | null) => {
+    if (!nextFile) {
+      setFile(null);
+      return;
+    }
+
+    if (!isSupportedStudyFile(nextFile)) {
+      setFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      toast({
+        title: "Unsupported file",
+        description: "Please choose a PDF or TXT study file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setFile(nextFile);
+  };
+
+  const clearStudyFile = () => {
+    setFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDraggingFile(false);
+    selectStudyFile(event.dataTransfer.files.item(0));
+  };
 
   const handleUpload = async () => {
     if (!file) {
@@ -197,14 +258,86 @@ export default function ImportDeckPage() {
               <Label htmlFor="studyFile" className="text-sm">
                 Study File *
               </Label>
-              <Input
-                id="studyFile"
-                type="file"
-                accept=".pdf,.txt,application/pdf,text/plain"
-                onChange={(event) => setFile(event.target.files?.[0] || null)}
-                className="h-11"
-              />
-              <p className="text-[10px] sm:text-xs text-muted-foreground">
+              <div
+                role="button"
+                tabIndex={0}
+                aria-describedby="studyFile-help"
+                onClick={() => fileInputRef.current?.click()}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    fileInputRef.current?.click();
+                  }
+                }}
+                onDragEnter={(event) => {
+                  event.preventDefault();
+                  setIsDraggingFile(true);
+                }}
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  event.dataTransfer.dropEffect = "copy";
+                  setIsDraggingFile(true);
+                }}
+                onDragLeave={(event) => {
+                  if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+                    setIsDraggingFile(false);
+                  }
+                }}
+                onDrop={handleDrop}
+                className={cn(
+                  "flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  isDraggingFile
+                    ? "border-primary bg-primary/10"
+                    : file
+                      ? "border-primary/50 bg-primary/5"
+                      : "border-border bg-background hover:border-primary/40 hover:bg-muted/40",
+                )}
+              >
+                <Input
+                  ref={fileInputRef}
+                  id="studyFile"
+                  type="file"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  accept=".pdf,.txt,application/pdf,text/plain"
+                  onClick={(event) => event.stopPropagation()}
+                  onChange={(event) =>
+                    selectStudyFile(event.target.files?.[0] || null)
+                  }
+                  className="hidden"
+                />
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-lg gradient-bg">
+                  {file ? (
+                    <FileText className="h-5 w-5 text-primary-foreground" />
+                  ) : (
+                    <Upload className="h-5 w-5 text-primary-foreground" />
+                  )}
+                </div>
+                <p className="text-sm font-medium sm:text-base">
+                  {file ? file.name : "Drop your PDF or TXT file here"}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                  {file
+                    ? `${formatFileSize(file.size)} selected`
+                    : "or click to browse from your computer"}
+                </p>
+              </div>
+              {file && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-0 text-muted-foreground hover:text-destructive"
+                  onClick={clearStudyFile}
+                >
+                  <XCircle className="mr-1.5 h-4 w-4" />
+                  Remove selected file
+                </Button>
+              )}
+              <p
+                id="studyFile-help"
+                className="text-[10px] sm:text-xs text-muted-foreground"
+              >
                 Supported files: PDF and TXT
               </p>
             </div>

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Mail, ArrowLeft, CheckCircle } from "lucide-react";
+import { Sparkles, Mail, ArrowLeft, CheckCircle } from "@/components/ui/icons";
 import { useToast } from "@/hooks/use-toast";
 import { useAppStore } from "@/stores/appStore";
 

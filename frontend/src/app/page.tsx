@@ -13,7 +13,7 @@ import {
   CheckCircle,
   Menu,
   X,
-} from "lucide-react";
+} from "@/components/ui/icons";
 import { DarkModeToggle } from "@/components/dark-mode-toggle";
 import { useAppStore } from "@/stores/appStore";
 

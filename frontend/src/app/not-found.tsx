@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Home, Sparkles } from "lucide-react";
+import { Home, Sparkles } from "@/components/ui/icons";
 
 export default function NotFound() {
   return (

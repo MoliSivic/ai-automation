@@ -19,7 +19,7 @@ import {
   Wand2,
   Menu,
   Upload,
-} from "lucide-react";
+} from "@/components/ui/icons";
 import { useAppStore } from "@/stores/appStore";
 import {
   DropdownMenu,

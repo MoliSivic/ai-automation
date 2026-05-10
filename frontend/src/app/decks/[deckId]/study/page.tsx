@@ -11,7 +11,7 @@ import {
   Trophy,
   ChevronLeft,
   ChevronRight,
-} from "lucide-react";
+} from "@/components/ui/icons";
 import { useAppStore } from "@/stores/appStore";
 import { Progress } from "@/components/ui/progress";
 

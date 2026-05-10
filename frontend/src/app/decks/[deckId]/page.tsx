@@ -16,7 +16,7 @@ import {
   Save,
   X,
   Download,
-} from "lucide-react";
+} from "@/components/ui/icons";
 import { useAppStore } from "@/stores/appStore";
 import { useToast } from "@/hooks/use-toast";
 import { downloadFromBackend } from "@/lib/backend/client";

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Sparkles, ArrowLeft } from "lucide-react";
+import { Sparkles, ArrowLeft } from "@/components/ui/icons";
 
 export default function TermsPage() {
   return (

@@ -23,7 +23,7 @@ import {
   Trash2,
   RefreshCw,
   Save,
-} from "lucide-react";
+} from "@/components/ui/icons";
 import { useAppStore } from "@/stores/appStore";
 import { useToast } from "@/hooks/use-toast";
 import { backendFetch } from "@/lib/backend/client";

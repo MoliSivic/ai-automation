@@ -17,7 +17,7 @@ import {
   CheckCircle,
   Check,
   X,
-} from "lucide-react";
+} from "@/components/ui/icons";
 import { useAppStore } from "@/stores/appStore";
 import { useToast } from "@/hooks/use-toast";
 
