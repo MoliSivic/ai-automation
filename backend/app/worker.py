@@ -6,7 +6,13 @@ from watchdog.observers import Observer
 
 from app.config import get_settings
 from app.database import init_db
-from app.processing import create_processing_job, process_job_by_id
+from app.processing import (
+    DEFAULT_IMPORT_STYLE,
+    clamp_requested_card_count,
+    create_processing_job,
+    normalize_deck_title,
+    process_job_by_id,
+)
 from app.storage import SUPPORTED_EXTENSIONS
 
 
@@ -44,9 +50,9 @@ class InboxHandler(FileSystemEventHandler):
             user_id=self.user_id,
             source_filename=path.name,
             source_path=path,
-            deck_title=path.stem.replace("_", " "),
-            requested_card_count=settings.worker_card_count,
-            style="concise",
+            deck_title=normalize_deck_title(None, path.name),
+            requested_card_count=clamp_requested_card_count(settings.worker_card_count),
+            style=DEFAULT_IMPORT_STYLE,
             ai_model=settings.gemini_model,
         )
         process_job_by_id(job.id)
@@ -80,4 +86,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

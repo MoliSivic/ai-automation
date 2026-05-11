@@ -3,7 +3,6 @@ from pathlib import Path
 from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import crud, models
@@ -12,7 +11,14 @@ from app.auth import get_current_user
 from app.config import Settings, get_settings
 from app.database import SessionLocal, get_db, init_db
 from app.deck_export import export_deck_to_apkg
-from app.processing import create_processing_job, process_job_by_id
+from app.processing import (
+    clamp_requested_card_count,
+    create_processing_job,
+    get_job_for_user,
+    list_jobs_for_user,
+    normalize_import_style,
+    process_job_by_id,
+)
 from app.schemas import (
     AuthUser,
     BulkCardsCreate,
@@ -207,8 +213,8 @@ async def upload_import_route(
         source_filename=file.filename or "study-file",
         source_path=Path("pending"),
         deck_title=deck_title or None,
-        requested_card_count=max(1, min(card_count, 30)),
-        style=style,
+        requested_card_count=clamp_requested_card_count(card_count),
+        style=normalize_import_style(style),
         ai_model=model,
     )
     source_path = await save_upload(file, user.id, job.id)
@@ -230,13 +236,7 @@ async def upload_import_route(
 def list_import_jobs_route(
     user: AuthUser = Depends(get_current_user), db: Session = Depends(get_db)
 ) -> list[models.ProcessingJob]:
-    return list(
-        db.scalars(
-            select(models.ProcessingJob)
-            .where(models.ProcessingJob.user_id == user.id)
-            .order_by(models.ProcessingJob.created_at.desc())
-        )
-    )
+    return list_jobs_for_user(db, user.id)
 
 
 @app.get("/api/imports/jobs/{job_id}", response_model=ProcessingJobOut)
@@ -245,11 +245,7 @@ def get_import_job_route(
     user: AuthUser = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> models.ProcessingJob:
-    job = db.scalar(
-        select(models.ProcessingJob).where(
-            models.ProcessingJob.id == job_id, models.ProcessingJob.user_id == user.id
-        )
-    )
+    job = get_job_for_user(db, user.id, job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Import job not found.")
     return job

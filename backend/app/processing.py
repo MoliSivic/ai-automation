@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from app import models
 from app.ai import AIConfigurationError, AIResponseError, generate_flashcards
@@ -8,6 +9,29 @@ from app.config import get_settings
 from app.database import SessionLocal
 from app.deck_export import export_deck_to_apkg
 from app.storage import extract_text, safe_filename
+
+
+IMPORT_CARD_COUNT_MIN = 1
+IMPORT_CARD_COUNT_MAX = 30
+DEFAULT_IMPORT_STYLE = "concise"
+ALLOWED_IMPORT_STYLES = {"concise", "detailed", "simple", "academic"}
+
+
+def clamp_requested_card_count(card_count: int) -> int:
+    return max(IMPORT_CARD_COUNT_MIN, min(card_count, IMPORT_CARD_COUNT_MAX))
+
+
+def normalize_import_style(style: str | None) -> str:
+    if style in ALLOWED_IMPORT_STYLES:
+        return style
+    return DEFAULT_IMPORT_STYLE
+
+
+def normalize_deck_title(deck_title: str | None, fallback_filename: str) -> str:
+    title = deck_title.strip() if deck_title else ""
+    if not title:
+        title = Path(fallback_filename).stem.replace("_", " ").replace("-", " ").strip()
+    return (title or "Imported deck")[:200]
 
 
 def create_processing_job(
@@ -25,8 +49,8 @@ def create_processing_job(
             source_filename=safe_filename(source_filename),
             source_path=str(source_path),
             deck_title=deck_title.strip() if deck_title else None,
-            requested_card_count=requested_card_count,
-            style=style,
+            requested_card_count=clamp_requested_card_count(requested_card_count),
+            style=normalize_import_style(style),
             ai_model=ai_model,
             status="pending",
         )
@@ -60,10 +84,10 @@ def process_job_by_id(job_id: str) -> None:
                 model=job.ai_model,
             )
 
-            title = job.deck_title or source_path.stem.replace("_", " ").strip() or "Imported deck"
+            title = normalize_deck_title(job.deck_title, job.source_filename)
             deck = models.Deck(
                 user_id=job.user_id,
-                title=title[:200],
+                title=title,
                 description=f"Generated from {job.source_filename}",
                 card_count=len(cards),
             )
@@ -107,12 +131,21 @@ def process_job_by_id(job_id: str) -> None:
                 db.commit()
 
 
-def list_jobs_for_user(user_id: str) -> list[models.ProcessingJob]:
-    with SessionLocal() as db:
-        return list(
-            db.scalars(
-                select(models.ProcessingJob)
-                .where(models.ProcessingJob.user_id == user_id)
-                .order_by(models.ProcessingJob.created_at.desc())
-            )
+def list_jobs_for_user(db: Session, user_id: str) -> list[models.ProcessingJob]:
+    return list(
+        db.scalars(
+            select(models.ProcessingJob)
+            .where(models.ProcessingJob.user_id == user_id)
+            .order_by(models.ProcessingJob.created_at.desc())
         )
+    )
+
+
+def get_job_for_user(
+    db: Session, user_id: str, job_id: str
+) -> models.ProcessingJob | None:
+    return db.scalar(
+        select(models.ProcessingJob).where(
+            models.ProcessingJob.id == job_id, models.ProcessingJob.user_id == user_id
+        )
+    )
