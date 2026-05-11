@@ -23,6 +23,8 @@ backend/storage/      local uploads, watched inbox, and generated exports
 backend/tests/        backend unit tests
 ```
 
+See [DEVELOPMENT_LOG.md](DEVELOPMENT_LOG.md) for a May 5-21 development timeline covering the frontend and backend build process.
+
 ## Features
 
 - Email/password authentication through Supabase.
