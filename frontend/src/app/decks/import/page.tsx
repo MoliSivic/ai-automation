@@ -49,8 +49,36 @@ interface ImportJob {
 const ACCEPTED_FILE_TYPES = [
   "application/pdf",
   "text/plain",
-  "text/markdown",
 ];
+const MAX_IMPORT_FILE_SIZE_MB = 20;
+const MAX_IMPORT_FILE_SIZE_BYTES = MAX_IMPORT_FILE_SIZE_MB * 1024 * 1024;
+const CARD_STYLE_OPTIONS = [
+  { value: "concise", label: "Concise" },
+  { value: "detailed", label: "Detailed" },
+  { value: "simple", label: "Simple" },
+  { value: "academic", label: "Academic" },
+];
+const IMPORT_STATUS_COPY: Record<
+  string,
+  { label: string; description: string }
+> = {
+  pending: {
+    label: "Queued",
+    description: "The backend has accepted the file and is preparing it.",
+  },
+  processing: {
+    label: "Generating",
+    description: "Text is being extracted and converted into flashcards.",
+  },
+  completed: {
+    label: "Deck ready",
+    description: "Your flashcards and Anki package are ready.",
+  },
+  failed: {
+    label: "Needs attention",
+    description: "The import could not finish. Review the error below.",
+  },
+};
 
 function isSupportedStudyFile(candidate: File) {
   const fileName = candidate.name.toLowerCase();
@@ -66,6 +94,15 @@ function formatFileSize(bytes: number) {
   const kilobytes = bytes / 1024;
   if (kilobytes < 1024) return `${kilobytes.toFixed(1)} KB`;
   return `${(kilobytes / 1024).toFixed(1)} MB`;
+}
+
+function getImportStatusCopy(status: string) {
+  return (
+    IMPORT_STATUS_COPY[status] || {
+      label: status,
+      description: "The import status was updated by the backend.",
+    }
+  );
 }
 
 export default function ImportDeckPage() {
@@ -87,6 +124,7 @@ export default function ImportDeckPage() {
     () => job?.status === "pending" || job?.status === "processing",
     [job?.status],
   );
+  const jobStatusCopy = job ? getImportStatusCopy(job.status) : null;
 
   useEffect(() => {
     if (!job || !isWorking) return;
@@ -130,6 +168,19 @@ export default function ImportDeckPage() {
       toast({
         title: "Unsupported file",
         description: "Please choose a PDF or TXT study file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (nextFile.size > MAX_IMPORT_FILE_SIZE_BYTES) {
+      setFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      toast({
+        title: "File too large",
+        description: `Choose a file under ${MAX_IMPORT_FILE_SIZE_MB} MB.`,
         variant: "destructive",
       });
       return;
@@ -248,7 +299,8 @@ export default function ImportDeckPage() {
                 Import Study File
               </h1>
               <p className="text-muted-foreground text-xs sm:text-sm">
-                PDF or TXT notes become Anki-ready flashcards
+                PDF or TXT notes under {MAX_IMPORT_FILE_SIZE_MB} MB become
+                Anki-ready flashcards
               </p>
             </div>
           </div>
@@ -338,7 +390,7 @@ export default function ImportDeckPage() {
                 id="studyFile-help"
                 className="text-[10px] sm:text-xs text-muted-foreground"
               >
-                Supported files: PDF and TXT
+                Supported files: PDF and TXT, up to {MAX_IMPORT_FILE_SIZE_MB} MB
               </p>
             </div>
 
@@ -378,10 +430,11 @@ export default function ImportDeckPage() {
                     <SelectValue placeholder="Select style" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover">
-                    <SelectItem value="concise">Concise</SelectItem>
-                    <SelectItem value="detailed">Detailed</SelectItem>
-                    <SelectItem value="simple">Simple</SelectItem>
-                    <SelectItem value="academic">Academic</SelectItem>
+                    {CARD_STYLE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -389,7 +442,7 @@ export default function ImportDeckPage() {
 
             <Button
               onClick={handleUpload}
-              disabled={isUploading || isWorking}
+              disabled={isUploading || isWorking || !file}
               className="w-full gradient-bg text-primary-foreground py-5 sm:py-6 text-base sm:text-lg"
             >
               {isUploading || isWorking ? (
@@ -417,9 +470,19 @@ export default function ImportDeckPage() {
                   <Loader2 className="w-5 h-5 text-primary mt-0.5 animate-spin" />
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium capitalize">{job.status}</p>
+                  <p className="font-medium">
+                    {jobStatusCopy?.label || job.status}
+                  </p>
                   <p className="text-sm text-muted-foreground truncate">
                     {job.source_filename}
+                  </p>
+                  {jobStatusCopy?.description && (
+                    <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                      {jobStatusCopy.description}
+                    </p>
+                  )}
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Requested {job.requested_card_count} {job.style} cards
                   </p>
                   {job.error_message && (
                     <p className="text-sm text-destructive mt-2">
