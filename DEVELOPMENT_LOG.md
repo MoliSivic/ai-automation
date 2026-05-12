@@ -64,6 +64,22 @@ This log summarizes the project development process for the FlashGenius frontend
 20. **May 21, 2026 - Final verification pass**
     Reviewed the README instructions, backend health check, test commands, and deployment notes so the project is easier to run and present.
 
+## Added Commit Notes
+
+These final commits document the extra project work added after the core app was already running:
+
+- **May 18, 2026 - `feat: improve import upload feedback`**
+  Added frontend validation for PDF/TXT uploads, a 20 MB file limit message, clearer import status labels, selected-file feedback, and generated-card request details.
+
+- **May 19, 2026 - `feat: centralize import job helpers`**
+  Moved import card-count limits, style normalization, deck-title cleanup, and job lookup helpers into the backend processing layer so uploads and watched inbox jobs share the same rules.
+
+- **May 20, 2026 - `test: cover import processing helpers`**
+  Added backend tests for import limits, style fallback, deck-title cleanup, safe filename handling, supported file validation, TXT extraction, and pytest path configuration.
+
+- **May 21, 2026 - `docs: document final project additions`**
+  Updated the README and development log so the final additions, their dates, and their purpose are easy to explain alongside the Git history.
+
 ## Current Architecture
 
 - **Frontend:** Next.js, React, TypeScript, Tailwind CSS, Supabase auth helpers.

@@ -31,7 +31,7 @@ See [DEVELOPMENT_LOG.md](DEVELOPMENT_LOG.md) for a May 5-21 development timeline
 - Protected dashboard with decks, cards, settings, and study sessions.
 - Manual deck and flashcard management.
 - Paste-notes AI generation flow for creating flashcards from text.
-- PDF and TXT upload flow for automated extraction and generation.
+- PDF and TXT upload flow with local file validation, status feedback, and automated extraction.
 - Watchdog worker for processing files dropped into `backend/storage/inbox`.
 - PostgreSQL persistence for decks, cards, settings, jobs, and sessions.
 - Anki `.apkg` export through `genanki`.
@@ -150,6 +150,8 @@ cd backend
 source .venv/bin/activate
 pytest tests
 ```
+
+The backend test suite covers Gemini response parsing, import helper limits, deck title normalization, filename sanitization, supported file validation, and TXT extraction.
 
 Runtime check:
 
