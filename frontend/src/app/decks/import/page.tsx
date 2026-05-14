@@ -34,6 +34,13 @@ import {
   CARD_STYLE_OPTIONS,
   getImportStatusCopy,
 } from "@/lib/import/status";
+import {
+  formatFileSize,
+  getDefaultDeckTitle,
+  isSupportedStudyFile,
+  isWithinImportSizeLimit,
+  MAX_IMPORT_FILE_SIZE_MB,
+} from "@/lib/import/files";
 import { cn } from "@/lib/utils";
 
 interface ImportJob {
@@ -48,29 +55,6 @@ interface ImportJob {
   ai_model: string | null;
   created_at: string;
   updated_at: string;
-}
-
-const ACCEPTED_FILE_TYPES = [
-  "application/pdf",
-  "text/plain",
-];
-const MAX_IMPORT_FILE_SIZE_MB = 20;
-const MAX_IMPORT_FILE_SIZE_BYTES = MAX_IMPORT_FILE_SIZE_MB * 1024 * 1024;
-
-function isSupportedStudyFile(candidate: File) {
-  const fileName = candidate.name.toLowerCase();
-  return (
-    fileName.endsWith(".pdf") ||
-    fileName.endsWith(".txt") ||
-    ACCEPTED_FILE_TYPES.includes(candidate.type)
-  );
-}
-
-function formatFileSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  const kilobytes = bytes / 1024;
-  if (kilobytes < 1024) return `${kilobytes.toFixed(1)} KB`;
-  return `${(kilobytes / 1024).toFixed(1)} MB`;
 }
 
 export default function ImportDeckPage() {
@@ -141,7 +125,7 @@ export default function ImportDeckPage() {
       return;
     }
 
-    if (nextFile.size > MAX_IMPORT_FILE_SIZE_BYTES) {
+    if (!isWithinImportSizeLimit(nextFile)) {
       setFile(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -368,7 +352,7 @@ export default function ImportDeckPage() {
               </Label>
               <Input
                 id="deckTitle"
-                placeholder={file?.name.replace(/\.[^.]+$/, "") || "Optional"}
+                placeholder={file ? getDefaultDeckTitle(file.name) : "Optional"}
                 value={deckTitle}
                 onChange={(event) => setDeckTitle(event.target.value)}
                 className="h-10 sm:h-11"
