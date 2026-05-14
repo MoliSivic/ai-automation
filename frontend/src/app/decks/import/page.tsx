@@ -30,6 +30,10 @@ import {
   downloadFromBackend,
   isBackendConnectionError,
 } from "@/lib/backend/client";
+import {
+  CARD_STYLE_OPTIONS,
+  getImportStatusCopy,
+} from "@/lib/import/status";
 import { cn } from "@/lib/utils";
 
 interface ImportJob {
@@ -52,33 +56,6 @@ const ACCEPTED_FILE_TYPES = [
 ];
 const MAX_IMPORT_FILE_SIZE_MB = 20;
 const MAX_IMPORT_FILE_SIZE_BYTES = MAX_IMPORT_FILE_SIZE_MB * 1024 * 1024;
-const CARD_STYLE_OPTIONS = [
-  { value: "concise", label: "Concise" },
-  { value: "detailed", label: "Detailed" },
-  { value: "simple", label: "Simple" },
-  { value: "academic", label: "Academic" },
-];
-const IMPORT_STATUS_COPY: Record<
-  string,
-  { label: string; description: string }
-> = {
-  pending: {
-    label: "Queued",
-    description: "The backend has accepted the file and is preparing it.",
-  },
-  processing: {
-    label: "Generating",
-    description: "Text is being extracted and converted into flashcards.",
-  },
-  completed: {
-    label: "Deck ready",
-    description: "Your flashcards and Anki package are ready.",
-  },
-  failed: {
-    label: "Needs attention",
-    description: "The import could not finish. Review the error below.",
-  },
-};
 
 function isSupportedStudyFile(candidate: File) {
   const fileName = candidate.name.toLowerCase();
@@ -94,15 +71,6 @@ function formatFileSize(bytes: number) {
   const kilobytes = bytes / 1024;
   if (kilobytes < 1024) return `${kilobytes.toFixed(1)} KB`;
   return `${(kilobytes / 1024).toFixed(1)} MB`;
-}
-
-function getImportStatusCopy(status: string) {
-  return (
-    IMPORT_STATUS_COPY[status] || {
-      label: status,
-      description: "The import status was updated by the backend.",
-    }
-  );
 }
 
 export default function ImportDeckPage() {
