@@ -57,6 +57,15 @@ interface ImportJob {
   updated_at: string;
 }
 
+function formatImportTimestamp(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
 export default function ImportDeckPage() {
   const { toast } = useToast();
   const { settings, fetchDecks } = useAppStore();
@@ -437,6 +446,9 @@ export default function ImportDeckPage() {
                   )}
                   <p className="mt-2 text-xs text-muted-foreground">
                     Requested {job.requested_card_count} {job.style} cards
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Updated {formatImportTimestamp(job.updated_at)}
                   </p>
                   {job.error_message && (
                     <p className="text-sm text-destructive mt-2">
