@@ -179,6 +179,8 @@ export default function ImportDeckPage() {
         body: formData,
       });
       setJob(nextJob);
+      clearStudyFile();
+      setDeckTitle("");
       toast({
         title: "Import started",
         description: "The backend is extracting text and generating cards.",
