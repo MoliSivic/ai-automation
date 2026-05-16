@@ -6,11 +6,13 @@ from watchdog.observers import Observer
 
 from app.config import get_settings
 from app.database import init_db
-from app.processing import (
+from app.import_rules import (
     DEFAULT_IMPORT_STYLE,
     clamp_requested_card_count,
-    create_processing_job,
     normalize_deck_title,
+)
+from app.processing import (
+    create_processing_job,
     process_job_by_id,
 )
 from app.storage import SUPPORTED_EXTENSIONS

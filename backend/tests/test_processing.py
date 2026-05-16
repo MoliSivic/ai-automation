@@ -1,4 +1,4 @@
-from app.processing import (
+from app.import_rules import (
     DEFAULT_IMPORT_STYLE,
     clamp_requested_card_count,
     normalize_deck_title,

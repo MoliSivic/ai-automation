@@ -11,12 +11,11 @@ from app.auth import get_current_user
 from app.config import Settings, get_settings
 from app.database import SessionLocal, get_db, init_db
 from app.deck_export import export_deck_to_apkg
+from app.import_rules import clamp_requested_card_count, normalize_import_style
 from app.processing import (
-    clamp_requested_card_count,
     create_processing_job,
     get_job_for_user,
     list_jobs_for_user,
-    normalize_import_style,
     process_job_by_id,
 )
 from app.schemas import (
