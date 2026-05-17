@@ -11,6 +11,7 @@ from app.import_rules import (
     normalize_deck_title,
     normalize_import_style,
 )
+from app.job_status import JOB_COMPLETED, JOB_FAILED, JOB_PENDING, JOB_PROCESSING
 from app.storage import extract_text, safe_filename
 
 
@@ -32,7 +33,7 @@ def create_processing_job(
             requested_card_count=clamp_requested_card_count(requested_card_count),
             style=normalize_import_style(style),
             ai_model=ai_model,
-            status="pending",
+            status=JOB_PENDING,
         )
         db.add(job)
         db.commit()
@@ -48,7 +49,7 @@ def process_job_by_id(job_id: str) -> None:
             return
 
         try:
-            job.status = "processing"
+            job.status = JOB_PROCESSING
             job.error_message = None
             db.commit()
 
@@ -93,12 +94,12 @@ def process_job_by_id(job_id: str) -> None:
 
             job.deck_id = deck.id
             job.output_path = str(output_path)
-            job.status = "completed"
+            job.status = JOB_COMPLETED
             db.commit()
         except Exception as exc:
             job = db.get(models.ProcessingJob, job_id)
             if job:
-                job.status = "failed"
+                job.status = JOB_FAILED
                 if isinstance(exc, (AIConfigurationError, AIResponseError)):
                     job.error_message = str(exc)
                 elif exc.__class__.__module__.startswith("google"):
