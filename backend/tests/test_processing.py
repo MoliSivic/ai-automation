@@ -1,4 +1,5 @@
 from app.import_rules import (
+    ALLOWED_IMPORT_STYLES,
     DEFAULT_IMPORT_STYLE,
     clamp_requested_card_count,
     normalize_deck_title,
@@ -16,6 +17,10 @@ def test_normalize_import_style_falls_back_to_default() -> None:
     assert normalize_import_style("academic") == "academic"
     assert normalize_import_style("unknown") == DEFAULT_IMPORT_STYLE
     assert normalize_import_style(None) == DEFAULT_IMPORT_STYLE
+
+
+def test_allowed_import_styles_match_user_facing_choices() -> None:
+    assert ALLOWED_IMPORT_STYLES == {"concise", "detailed", "simple", "academic"}
 
 
 def test_normalize_deck_title_uses_clean_filename_fallback() -> None:
