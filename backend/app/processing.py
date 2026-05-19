@@ -13,6 +13,7 @@ from app.import_rules import (
 )
 from app.job_status import JOB_COMPLETED, JOB_FAILED, JOB_PENDING, JOB_PROCESSING
 from app.storage import extract_text, safe_filename
+from app.text_stats import build_source_description
 
 
 def create_processing_job(
@@ -69,7 +70,7 @@ def process_job_by_id(job_id: str) -> None:
             deck = models.Deck(
                 user_id=job.user_id,
                 title=title,
-                description=f"Generated from {job.source_filename}",
+                description=build_source_description(job.source_filename, study_text),
                 card_count=len(cards),
             )
             db.add(deck)
