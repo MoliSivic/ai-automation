@@ -116,6 +116,13 @@ http://localhost:3000
 
 The worker watches `backend/storage/inbox` for supported study files. Set `WORKER_USER_ID` in `backend/.env` to the Supabase user id that should own decks created by watched-file imports.
 
+Import behavior is intentionally shared between browser uploads and the worker:
+
+- Files must be PDF or TXT.
+- Card counts are clamped between 1 and 30.
+- Styles outside `concise`, `detailed`, `simple`, and `academic` fall back to `concise`.
+- Generated deck descriptions include source-file context and extracted word counts.
+
 Run the worker:
 
 ```bash
