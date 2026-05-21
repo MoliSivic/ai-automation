@@ -1,7 +1,6 @@
-# Development Log
+# Development Process/Plan
 
-This log summarizes the project development process for the FlashGenius frontend and backend during the May 5-21, 2026 build window. It is a human-readable milestone record; the Git commit log remains the source of truth for exact repository history.
-
+This log summarizes the project development process for the FlashGenius frontend and backend during the May 5-21, 2026 build window. 
 ## Timeline
 
 1. **May 5, 2026 - Product scope**
