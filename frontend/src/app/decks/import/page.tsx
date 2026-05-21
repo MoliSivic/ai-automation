@@ -70,6 +70,7 @@ export default function ImportDeckPage() {
   const { toast } = useToast();
   const { settings, fetchDecks } = useAppStore();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const dragDepthRef = useRef(0);
   const [file, setFile] = useState<File | null>(null);
   const [deckTitle, setDeckTitle] = useState("");
   const [cardCount, setCardCount] = useState([
@@ -160,8 +161,23 @@ export default function ImportDeckPage() {
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
+    dragDepthRef.current = 0;
     setIsDraggingFile(false);
     selectStudyFile(event.dataTransfer.files.item(0));
+  };
+
+  const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    dragDepthRef.current += 1;
+    setIsDraggingFile(true);
+  };
+
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
+    if (dragDepthRef.current === 0) {
+      setIsDraggingFile(false);
+    }
   };
 
   const handleUpload = async () => {
@@ -284,20 +300,13 @@ export default function ImportDeckPage() {
                     fileInputRef.current?.click();
                   }
                 }}
-                onDragEnter={(event) => {
-                  event.preventDefault();
-                  setIsDraggingFile(true);
-                }}
+                onDragEnter={handleDragEnter}
                 onDragOver={(event) => {
                   event.preventDefault();
                   event.dataTransfer.dropEffect = "copy";
                   setIsDraggingFile(true);
                 }}
-                onDragLeave={(event) => {
-                  if (!event.currentTarget.contains(event.relatedTarget as Node)) {
-                    setIsDraggingFile(false);
-                  }
-                }}
+                onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 className={cn(
                   "flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
